@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
+
 /// Deduplicate lines from `input_path` -> `output_path`.
 pub fn deduplicate_file(input_path: &Path, output_path: &Path) -> io::Result<()> {
     let input = File::open(input_path)?;
