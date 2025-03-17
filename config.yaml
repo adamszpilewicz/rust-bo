@@ -1,0 +1,3 @@
+pattern: "./input/diff_result_*"
+mod_file: "./input/alter_mod.txt"
+output: "./output"

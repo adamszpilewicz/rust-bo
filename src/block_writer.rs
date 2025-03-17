@@ -5,13 +5,11 @@ use std::path::Path;
 use crate::{SqlBlock, CREATE_TABLE_SUFFIX, CREATE_INDEX_SUFFIX};
 
 /// Writes each SQL block to a new file named e.g. "STEP_001_CREATE_MyTable.sql".
-pub use regex::Regex;
-
-
-pub fn write_blocks_to_files(mut blocks: Vec<SqlBlock>, output_dir: &Path) -> io::Result<()> {
+/// Returns the number of blocks written.
+pub fn write_blocks_to_files(mut blocks: Vec<SqlBlock>, output_dir: &Path) -> io::Result<usize> {
     // Pre-compile small regexes for detection
-    let create_table_re = Regex::new(r"(?i)^CREATE\s+TABLE").unwrap();
-    let create_index_re = Regex::new(r"(?i)^CREATE\s+INDEX").unwrap();
+    let create_table_re = regex::Regex::new(r"(?i)^CREATE\s+TABLE").unwrap();
+    let create_index_re = regex::Regex::new(r"(?i)^CREATE\s+INDEX").unwrap();
 
     let mut step = 0usize;
 
@@ -20,11 +18,11 @@ pub fn write_blocks_to_files(mut blocks: Vec<SqlBlock>, output_dir: &Path) -> io
         let step_str = format!("{:03}", step);
         let file_name = format!("STEP_{}_{}.sql", step_str, block.name);
 
+        let final_path = output_dir.join(file_name);
         if block.lines.is_empty() {
             continue;
         }
 
-        let final_path = output_dir.join(file_name);
         let mut f = OpenOptions::new()
             .create(true)
             .write(true)
@@ -55,5 +53,5 @@ pub fn write_blocks_to_files(mut blocks: Vec<SqlBlock>, output_dir: &Path) -> io
             writeln!(f, "{}", out_line)?;
         }
     }
-    Ok(())
+    Ok(step)
 }
