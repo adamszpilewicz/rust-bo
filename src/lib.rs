@@ -3,6 +3,7 @@ pub mod concatenate;
 pub mod deduplicate;
 pub mod split_sql;
 pub mod block_writer;
+pub mod mod_writer;
 
 use std::path::PathBuf;
 use glob::glob;
