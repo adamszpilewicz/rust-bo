@@ -4,6 +4,8 @@ pub mod deduplicate;
 pub mod split_sql;
 pub mod block_writer;
 pub mod mod_writer;
+pub mod install_writer;
+pub mod cleanup;
 
 use std::path::PathBuf;
 use glob::glob;
@@ -25,6 +27,7 @@ pub const GRANT_REF_PATTERN: &str = r"(?i)^GRANT\s+REFERENCES\s+ON\s+[A-Za-z0-9_
 pub const ALTER_PREFIX: &str = "ALTER_";
 pub const CREATE_PREFIX: &str = "CREATE_";
 pub const STEP_FILE_FORMAT: &str = "STEP_{}_{}.sql";
+pub const INSTALL_FILE_NAME: &str = "INSTALL.TXT";
 
 pub const CREATE_TABLE_SUFFIX: &str = r#" TABLESPACE BO_D_RW_D_02
 PARTITION BY RANGE (TECH_DUE_DT) INTERVAL(NUMTODSINTERVAL(1, 'DAY'))

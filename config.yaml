@@ -1,3 +1,44 @@
 pattern: "./input/diff_result_*"
 mod_file: "./input/alter_mod.txt"
-output: "./output"
+output: "./01_ORACLE"
+install_config:
+  install_file_name: "install.TXT"
+  header_lines:
+    - "000|header|KMB-06.01.65-REL|2024/10/09|Bank|PZ001122"
+    - "001|auto|komb|oracle|run_loader|01_ORACLE/XX_CLOB_KOSP_MSP|loader_data.txt|loader.ctl"
+  common_sql_execution_prefix: "{}|auto|komb|oracle|run_sql|01_ORACLE/30_DML/MDA_01|{}"  # ✅ Added
+  sql_execution_format: "{}|auto|komb|oracle|run_sql|01_ORACLE/30_DML/MDA_01|{}"
+  footer_line: "{}|auto|komb|oracle|run_sql|01_ORACLE/30_DML/MDA_01|STEP_{}_DML_BO_CLOBS.sql"
+  footer_sql_content: |
+    --Tutaj dodajemy nowa definicje mapowania dla zmian w MSP dostosowanie do 1.67
+    UPDATE mda_01.t01002_bo_mapping_rel
+    SET valid_to = trunc(CURRENT_DATE)
+    WHERE PROCESS_NM IN ('K_OSP_MSP')
+    AND VALID_TO = date'9999-12-31';
+
+    -- Ustawia nowe mapowanie domyslne dla procesu K_OSP_MSP
+    INSERT INTO mda_01.t01002_bo_mapping_rel (
+        rel_id,
+        process_nm,
+        version_num,
+        step_nm,
+        valid_from,
+        valid_to,
+        mapping_id,
+        ddl_ts,
+        force_compare_mapping_id,
+        json_save_flg
+    ) VALUES (
+        521,
+        'K_OSP_MSP',
+        - 1,
+        'Default',
+        trunc(CURRENT_DATE),
+        DATE '9999-12-31',
+        521,
+        CURRENT_DATE,
+        NULL,
+        NULL
+    );
+
+    COMMIT;

@@ -1,61 +1,40 @@
+use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
-use std::env;
-use serde::Deserialize;
-use serde_yaml;
 
-// If you have these constants
-use crate::{DEFAULT_PATTERN, DEFAULT_OUTPUT};
-
+/// Represents the parsed configuration from `config.yaml`.
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    /// The pattern for input files; fallback to DEFAULT_PATTERN if not given
-    pub pattern: Option<String>,
-    /// The path to the mod_file; fallback to none or something else if not given
-    pub mod_file: Option<String>,
-    /// The output directory; fallback to DEFAULT_OUTPUT if not given
-    pub output: Option<String>,
+    pub pattern: String,
+    pub mod_file: String,
+    pub output: String,
+    pub install_config: InstallConfig,
 }
 
-/// parse_args: load config from "config.yaml", apply defaults, and
-/// still allow optional overrides from `--pattern=` or `--output=` on CLI.
-///
-/// Returns (pattern_string, mod_file_string, output_directory_pathbuf)
-pub fn parse_args() -> (String, String, PathBuf) {
-    let config_bytes = fs::read("config.yaml")
-        .expect("Failed to read config.yaml. Please ensure it exists.");
+/// Struct to store the parsed YAML configuration for install.TXT
+#[derive(Debug, Deserialize)]
+pub struct InstallConfig {
+    pub install_file_name: String,
+    pub header_lines: Vec<String>,
+    pub sql_execution_format: String,
+    pub footer_line: Option<String>,  // ✅ Ensure this is an Option<String>
+    pub footer_sql_content: Option<String>, // ✅ Ensure this is an Option<String>
+}
 
-    let parsed_config: Config = serde_yaml::from_slice(&config_bytes)
-        .expect("Invalid YAML in config.yaml.");
 
-    // Apply default for pattern if missing
-    let mut pattern_str = parsed_config
-        .pattern
-        .unwrap_or_else(|| DEFAULT_PATTERN.to_string());
 
-    // We won't have a default for mod_file, let's keep it empty if not specified
-    let mod_file_str = parsed_config
-        .mod_file
-        .unwrap_or_else(|| "".to_string());
+/// Reads `config.yaml` and parses the values.
+pub fn parse_args() -> (Config, PathBuf) {
+    let config_file = "config.yaml";
 
-    // Apply default for output if missing
-    let mut output_str = parsed_config
-        .output
-        .unwrap_or_else(|| DEFAULT_OUTPUT.to_string());
+    // Read the YAML file
+    let yaml_str = fs::read_to_string(config_file)
+        .expect(&format!("Failed to read {}", config_file));
 
-    // Optional: override some with CLI flags
-    for arg in env::args().skip(1) {
-        if let Some(stripped) = arg.strip_prefix("--pattern=") {
-            pattern_str = stripped.to_string();
-        } else if let Some(stripped) = arg.strip_prefix("--output=") {
-            output_str = stripped.to_string();
-        }
-        // If you want a CLI override for mod_file, add the code:
-        // else if let Some(stripped) = arg.strip_prefix("--mod_file=") {
-        //     mod_file_str = stripped.to_string();
-        // }
-    }
+    // Parse YAML using serde_yaml
+    let parsed_config: Config = serde_yaml::from_str(&yaml_str)
+        .expect("Invalid YAML format");
 
-    let output_dir = PathBuf::from(&output_str);
-    (pattern_str, mod_file_str, output_dir)
+    let output_dir = PathBuf::from(&parsed_config.output);
+    (parsed_config, output_dir)
 }
