@@ -40,6 +40,8 @@ COMPRESS FOR QUERY HIGH ROW LEVEL LOCKING"#;
 pub const CREATE_INDEX_SUFFIX: &str = r#" TABLESPACE BO_I_RW_D_02
 NOCOMPRESS LOCAL"#;
 
+pub const DELETE_INDEX_SUFFIX: &str = r#" TABLESPACE BO_I_RW_D_01"#;
+
 /// A block of SQL statements.
 #[derive(Debug)]
 pub struct SqlBlock {

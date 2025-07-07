@@ -2,7 +2,7 @@ use std::fs::OpenOptions;
 use std::io::{self, Write};
 use std::path::Path;
 
-use crate::{SqlBlock, CREATE_TABLE_SUFFIX, CREATE_INDEX_SUFFIX};
+use crate::{SqlBlock, CREATE_TABLE_SUFFIX, CREATE_INDEX_SUFFIX, DELETE_INDEX_SUFFIX};
 
 /// Writes each SQL block to a new file named e.g. "STEP_001_CREATE_MyTable.sql".
 /// Returns the number of blocks written.
@@ -39,10 +39,13 @@ pub fn write_blocks_to_files(mut blocks: Vec<SqlBlock>, output_dir: &Path) -> io
                     out_line.push_str(CREATE_TABLE_SUFFIX);
                 }
             } else if create_index_re.is_match(&out_line) {
+                // Delete TABLESPACE BO_I_RW_D_01 if present
+                out_line = out_line.replace(DELETE_INDEX_SUFFIX, "");
                 // Append CREATE INDEX suffix if not already present
                 if !out_line.contains("TABLESPACE BO_I_RW_D_02") {
                     out_line.push_str(CREATE_INDEX_SUFFIX);
                 }
+                
             }
 
             // Ensure a semicolon at the end, if not present

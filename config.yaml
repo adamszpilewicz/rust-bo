@@ -1,4 +1,4 @@
-pattern: "./input/diff_result_*"
+pattern: "./input/diff_result*"
 mod_file: "./input/alter_mod.txt"
 output: "./01_ORACLE"
 install_config:
